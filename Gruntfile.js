@@ -1,6 +1,13 @@
 /*global module*/
 /*jshint node: true*/
 
+function getFileInfoString(i) {
+    return '[{{= filename(src[' + i + ']) }} v{{= config("pkg.version") }}]' +
+           '({{= config("file_info.all.srcPrefix") }}/{{= src[' + i + '] }}) ' +
+           '{{= sizeText(size(src[' + i + '])) }} ' +
+           '({{= sizeText(gzipSize(src[' + i + '])) }} gzipped)';
+}
+
 module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -13,6 +20,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-image-embed');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-parallel');
+    grunt.loadNpmTasks('grunt-file-info');
 
     var rewriteRulesSnippet = require('grunt-connect-rewrite/lib/utils').rewriteRequest;
 
@@ -169,6 +177,35 @@ module.exports = function (grunt) {
                 }]
             }
         },
+        /*jshint camelcase:false*/
+        file_info: {
+            all: {
+                srcPrefix: 'https://raw.githubusercontent.com/box/viewer.js/v<%= pkg.version %>',
+                src: [
+                    'dist/crocodoc.viewer.js',
+                    'dist/crocodoc.viewer.css',
+                    'dist/crocodoc.viewer.min.js',
+                    'dist/crocodoc.viewer.min.css'
+                ],
+                options: {
+                    stdout: false,
+                    inject: {
+                        dest: 'README.md',
+                        text: '**Development**' +
+                            grunt.util.linefeed + grunt.util.linefeed +
+                            getFileInfoString(0) +
+                            grunt.util.linefeed + grunt.util.linefeed +
+                            getFileInfoString(1) +
+                            grunt.util.linefeed + grunt.util.linefeed +
+                            '**Production**' +
+                            grunt.util.linefeed + grunt.util.linefeed +
+                            getFileInfoString(2) +
+                            grunt.util.linefeed + grunt.util.linefeed +
+                            getFileInfoString(3)
+                    }
+                }
+            }
+        },
         // this task allows us to run the connect and realtime servers in parallel
         parallel: {
             examples: {
@@ -200,5 +237,5 @@ module.exports = function (grunt) {
     grunt.registerTask('default', defaultTasks);
     grunt.registerTask('build', ['default', 'cssmin', 'uglify']);
     grunt.registerTask('serve', ['default', 'configureRewriteRules', 'parallel:examples']);
-    grunt.registerTask('release', ['build', 'copy:dist']);
+    grunt.registerTask('release', ['build', 'copy:dist', 'file_info']);
 };
