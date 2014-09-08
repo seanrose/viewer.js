@@ -11,7 +11,8 @@ Crocodoc.addComponent('resizer', function (scope) {
 
     'use strict';
 
-    var support = scope.getUtility('support');
+    var support = scope.getUtility('support'),
+        dom = scope.getUtility('dom');
 
     // shorter way of defining
     // 'fullscreenchange webkitfullscreenchange mozfullscreenchange MSFullscreenChange'
@@ -20,9 +21,7 @@ Crocodoc.addComponent('resizer', function (scope) {
         // @NOTE: IE 11 uses upper-camel-case for this, which is apparently necessary
         'MSFullscreenChange';
 
-    var $window = $(window),
-        $document = $(document),
-        element,
+    var element,
         frameWidth = 0,
         currentClientWidth,
         currentClientHeight,
@@ -122,17 +121,17 @@ Crocodoc.addComponent('resizer', function (scope) {
 
         /**
          * Initialize the Resizer component with an element to watch
-         * @param  {HTMLElement} el The element to watch
+         * @param  {Element} el The element to watch
          * @returns {void}
          */
         init: function (el) {
-            element = $(el).get(0);
+            element = el;
 
             // use the documentElement for viewport dimensions
             // if we are using the window as the viewport
             if (element === window) {
                 element = document.documentElement;
-                $window.on('resize', checkResize);
+                dom.on(window, 'resize', checkResize);
                 // @NOTE: we don't need to loop with
                 // requestAnimationFrame in this case,
                 // because we can rely on window.resize
@@ -141,7 +140,7 @@ Crocodoc.addComponent('resizer', function (scope) {
             } else {
                 loop();
             }
-           $document.on(FULLSCREENCHANGE_EVENT, checkResize);
+           dom.on(document, FULLSCREENCHANGE_EVENT, checkResize);
         },
 
         /**
@@ -149,8 +148,8 @@ Crocodoc.addComponent('resizer', function (scope) {
          * @returns {void}
          */
         destroy: function () {
-            $document.off(FULLSCREENCHANGE_EVENT, checkResize);
-            $window.off('resize', checkResize);
+            dom.off(document, FULLSCREENCHANGE_EVENT, checkResize);
+            dom.off(window, 'resize', checkResize);
             support.cancelAnimationFrame(resizeFrameID);
         }
     };
