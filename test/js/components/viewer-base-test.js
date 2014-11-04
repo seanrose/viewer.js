@@ -1,6 +1,7 @@
 module('Component - viewer-base', {
     setup: function () {
-        var self = this;
+        var self = this,
+            util = Crocodoc.getUtilityForTest('common');
 
         this.metadata = {
             numPages: 1,
@@ -50,7 +51,7 @@ module('Component - viewer-base', {
             common: {
                 insertCSS: function () { return { sheet: {} }; },
                 isFn: sinon.stub().returns(true),
-                extend: $.extend
+                extend: util.extend
             },
             ajax: {
                 request: function () {}
@@ -61,7 +62,8 @@ module('Component - viewer-base', {
             browser: {},
             support: {
                 svg: true
-            }
+            },
+            dom: Crocodoc.getUtilityForTest('dom')
         };
 
         this.viewerAPI = {
@@ -72,8 +74,8 @@ module('Component - viewer-base', {
             updateLayout: function () {}
         };
 
-        this.config = $.extend(true, {}, Crocodoc.Viewer.defaults);
-        this.config.$el = $('<div>');
+        this.config = util.extend(true, {}, Crocodoc.Viewer.defaults);
+        this.config.el = this.utilities.dom.create('div');
         this.config.api = this.viewerAPI;
         this.config.url = '/some/url';
 
@@ -200,7 +202,7 @@ test('loadAssets() should create and init a scroller component when loading meta
 
     this.mock(this.components.scroller)
         .expects('init')
-        .withArgs(sinon.match.object);
+        .withArgs(sinon.match.instanceOf(Element));
 
     this.component.init();
     this.component.loadAssets();
@@ -213,7 +215,7 @@ test('loadAssets() should create and init a resizer component when loading metad
 
     this.mock(this.components.resizer)
         .expects('init')
-        .withArgs(sinon.match.object);
+        .withArgs(sinon.match.instanceOf(Element));
 
     this.component.init();
     this.component.loadAssets();
@@ -248,11 +250,11 @@ test('loadAssets() should broadcast "ready" when loading metadata and stylesheet
 });
 
 test('destroy() should remove all Crocodoc-namespaced CSS classes from and empty the container element when called', function () {
-    var $el = this.config.$el;
+    var el = this.config.el;
     this.component.init();
     this.component.destroy();
-    ok($el.html().length === 0, 'HTML was emptied');
-    ok($el.attr('class').indexOf('crocodoc') < 0, 'namespaced CSS classes were removed');
+    ok(el.innerHTML.length === 0, 'HTML was emptied');
+    ok((el.getAttribute('class') || '').indexOf('crocodoc') < 0, 'namespaced CSS classes were removed');
 });
 
 test('destroy() should abort all asset requests when called', function () {
@@ -348,7 +350,7 @@ QUnit.cases([
     { name: 'scrollend', data: {} },
     { name: 'zoom', data: {} }
 ]).test('onmessage() should call fire() when called with the subscribed message', function (params) {
-    this.component.init($('<div>'), { });
+    this.component.init(this.config.el, { });
     this.mock(this.viewerAPI)
         .expects('fire')
         .withArgs(params.name, params.data).returns({
@@ -359,7 +361,7 @@ QUnit.cases([
 });
 
 test('onmessage() should call updateLayout() when called with the layoutchange message', function (params) {
-    this.component.init($('<div>'), { });
+    this.component.init(this.config.el, { });
     this.mock(this.viewerAPI)
         .expects('updateLayout');
     this.component.onmessage('layoutchange');

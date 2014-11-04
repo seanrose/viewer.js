@@ -1,6 +1,7 @@
 module('Component - controller-paged', {
     setup: function () {
-        var self = this;
+        var self = this,
+            util = Crocodoc.getUtilityForTest('common');
 
         this.metadata = {
             numPages: 1,
@@ -25,11 +26,13 @@ module('Component - controller-paged', {
                 clamp: sinon.stub().returnsArg(0),
                 template: sinon.stub().returnsArg(0),
                 calculatePtSize: sinon.stub().returns(1.33)
-            }
+            },
+            dom: Crocodoc.getUtilityForTest('dom')
         };
 
-        this.config = $.extend(true, {}, Crocodoc.Viewer.defaults);
-        this.config.$el = $('<div>');
+        this.config = util.extend(true, {}, Crocodoc.Viewer.defaults);
+        this.config.el = this.utilities.dom.create('div');
+        this.config.docEl = this.utilities.dom.create('div');
         this.config.metadata = this.metadata;
 
         this.scope = Crocodoc.getScopeForTest(this);
@@ -66,7 +69,7 @@ test('init() should create and init `numpages` page components with appropriate 
     var createComponentSpy = this.spy(this.scope, 'createComponent');
     this.mock(this.components.page)
         .expects('init')
-        .withArgs(sinon.match.object, sinon.match({
+        .withArgs(sinon.match.instanceOf(Element), sinon.match({
             status: PAGE_STATUS_NOT_LOADED
         }))
         .exactly(metadata.numpages);
@@ -93,13 +96,13 @@ test('init() should init page components with appropriate status when called and
     var mock = this.mock(this.components.page);
 
     mock.expects('init')
-        .withArgs(sinon.match.object, sinon.match({
+        .withArgs(sinon.match.instanceOf(Element), sinon.match({
             status: PAGE_STATUS_NOT_LOADED
         }))
         .once();
 
     mock.expects('init')
-        .withArgs(sinon.match.object, sinon.match({
+        .withArgs(sinon.match.instanceOf(Element), sinon.match({
             status: PAGE_STATUS_CONVERTING
         }))
         .exactly(metadata.numpages - 1);
@@ -127,7 +130,7 @@ test('init() should init page components with appropriate status when called and
     var mock = this.mock(this.components.page);
 
     mock.expects('init')
-        .withArgs(sinon.match.object, sinon.match({
+        .withArgs(sinon.match.instanceOf(Element), sinon.match({
             status: PAGE_STATUS_CONVERTING
         }))
         .exactly(metadata.numpages);

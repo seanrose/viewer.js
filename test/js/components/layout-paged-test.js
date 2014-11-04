@@ -3,13 +3,13 @@ module('Component - layout-paged', {
         var self = this;
         this.utilities = {
             common: Crocodoc.getUtilityForTest('common'),
+            dom: Crocodoc.getUtilityForTest('dom'),
             support: { csstransform: true }
         };
         this.config = {
-            $el: $(),
-            $viewport: $('<div>'),
-            $doc: $('<div>'),
-            $pages: $(),
+            el: this.utilities.dom.create('div'),
+            viewportEl: this.utilities.dom.create('div'),
+            docEl: this.utilities.dom.create('div'),
             page: 1,
             currentPage: 1,
             numPages: 5,
@@ -23,9 +23,9 @@ module('Component - layout-paged', {
         this.scope = Crocodoc.getScopeForTest(this);
 
         for (var i = 0; i < 10; i++) {
-            this.config.$doc.append('<div class="crocodoc-page"></div>');
+            this.utilities.dom.appendTo(this.config.docEl, '<div class="crocodoc-page"></div>');
         }
-        this.config.$pages = this.config.$doc.find('.crocodoc-page');
+        this.config.pageEls = this.utilities.dom.findAll('.crocodoc-page', this.config.docEl);
         this.component = Crocodoc.getComponentForTest('layout-paged', this.scope);
     }
 });
@@ -231,11 +231,11 @@ test('calculateScrollPositionForPage() should return the correct offset when cal
 test('scrollToOffset() scrolls to the given offset left and top when called', function () {
     var left = 10, top = 20;
     this.component.init(this.config);
-    var scrollLeftSpy = this.stub(this.component.$viewport, 'scrollLeft'),
-        scrollTopSpy = this.stub(this.component.$viewport, 'scrollTop');
+    var scrollLeftSpy = this.spy(this.utilities.dom, 'scrollLeft'),
+        scrollTopSpy = this.spy(this.utilities.dom, 'scrollTop');
     this.component.scrollToOffset(left, top);
-    ok(scrollLeftSpy.calledWith(left), 'scrollLeft set properly');
-    ok(scrollTopSpy.calledWith(top), 'scrollTop set properly');
+    ok(scrollLeftSpy.calledWith(this.config.viewportEl, left), 'scrollLeft set properly');
+    ok(scrollTopSpy.calledWith(this.config.viewportEl, top), 'scrollTop set properly');
 });
 
 test('setCurrentPage() updates the current page and visible pages and fire a pagefocus message when called with a new page number', function () {
@@ -286,15 +286,18 @@ test('handleScrollEnd() should update the current page when called', function ()
     var currentPage = 3;
     this.stub(this.component, 'updateVisiblePages');
     this.stub(this.component, 'handleScroll');
-    this.config.$pages = this.config.$doc.find('.crocodoc-page');
-    var $prevPage = this.config.$pages.eq(0).addClass(CSS_CLASS_CURRENT_PAGE);
-    var $currentPage = this.config.$pages.eq(currentPage - 1);
+
+    var prevPageEl = this.config.pageEls[0];
+    this.utilities.dom.addClass(prevPageEl, CSS_CLASS_CURRENT_PAGE);
+    var currentPageEl = this.config.pageEls[currentPage - 1];
+
     this.component.init(this.config);
     this.component.state.currentPage = currentPage;
     this.component.handleScrollEnd();
+
     // check if it updated the css classes on .crocodoc-page elements properly
-    ok(!$prevPage.hasClass(CSS_CLASS_CURRENT_PAGE), 'old page has correct css class');
-    ok($currentPage.hasClass(CSS_CLASS_CURRENT_PAGE), 'current page has correct css class');
+    ok(!this.utilities.dom.hasClass(prevPageEl, CSS_CLASS_CURRENT_PAGE), 'old page has correct css class');
+    ok(this.utilities.dom.hasClass(currentPageEl, CSS_CLASS_CURRENT_PAGE), 'current page has correct css class');
 });
 
 test('handleScrollEnd() should update the visible pages when called', function () {
@@ -354,12 +357,13 @@ test('updateVisiblePages() should update the css classes appropriately when call
     var CSS_CLASS_PAGE_VISIBLE = 'crocodoc-page-visible';
     var range = { min: 2, max: 4 };
     this.stub(this.component, 'calculateVisibleRange').returns(range);
-    var $invisible = this.config.$pages.eq(5).addClass(CSS_CLASS_PAGE_VISIBLE);
-    var $visible = this.config.$pages.slice(range.min, range.max);
+    var invisible = this.config.pageEls[5];
+    this.utilities.dom.addClass(invisible, CSS_CLASS_PAGE_VISIBLE);
+    var visible = this.config.pageEls.slice(range.min, range.max);
     this.component.init(this.config);
     this.component.updateVisiblePages(true);
-    ok(!$invisible.hasClass(CSS_CLASS_PAGE_VISIBLE), 'invisible pages have correct css class');
-    ok($visible.hasClass(CSS_CLASS_PAGE_VISIBLE), 'visible pages have correct css class');
+    ok(!this.utilities.dom.hasClass(invisible, CSS_CLASS_PAGE_VISIBLE), 'invisible pages have correct css class');
+    ok(this.utilities.dom.hasClass(visible, CSS_CLASS_PAGE_VISIBLE), 'visible pages have correct css class');
 });
 
 QUnit.cases([

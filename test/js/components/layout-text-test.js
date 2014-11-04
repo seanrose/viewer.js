@@ -2,12 +2,13 @@ module('Component - layout-text', {
     setup: function () {
         var self = this;
         this.utilities = {
-            common: Crocodoc.getUtilityForTest('common')
+            common: Crocodoc.getUtilityForTest('common'),
+            dom: Crocodoc.getUtilityForTest('dom')
         };
         this.config = {
-            $el: $(),
-            $viewport: $('<div>'),
-            $doc: $('<table>'),
+            el: this.utilities.dom.create('div'),
+            viewportEl: this.utilities.dom.create('div'),
+            docEl: this.utilities.dom.create('div'),
             minZoom: 0.01,
             maxZoom: 5,
             zoomLevels: [0.5, 1, 1.5, 5]

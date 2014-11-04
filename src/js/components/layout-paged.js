@@ -673,7 +673,7 @@ Crocodoc.addComponent('layout-paged', ['layout-base'], function (scope, base) {
          */
         handleScrollEnd: function (data) {
             // update CSS classes
-            var currentPageEl = dom.find(this.docEl, '.' + CSS_CLASS_CURRENT_PAGE);
+            var currentPageEl = dom.find('.' + CSS_CLASS_CURRENT_PAGE, this.docEl);
             dom.removeClass(currentPageEl, CSS_CLASS_CURRENT_PAGE);
             dom.addClass(this.pageEls[this.state.currentPage - 1], CSS_CLASS_CURRENT_PAGE);
             this.updateVisiblePages(true);
