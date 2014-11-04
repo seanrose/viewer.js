@@ -10,16 +10,20 @@ module('Component - resizer', {
                 },
                 cancelAnimationFrame: function () {}
             },
-            common: Crocodoc.getUtilityForTest('common')
+            common: Crocodoc.getUtilityForTest('common'),
+            dom: Crocodoc.getUtilityForTest('dom')
         };
         this.scope = Crocodoc.getScopeForTest(this);
         this.component = Crocodoc.getComponentForTest('resizer', this.scope);
         this.clock = sinon.useFakeTimers();
+        this.el = this.utilities.dom.create('div');
+        this.utilities.dom.appendTo(document.body, this.el);
     },
     teardown: function () {
         // disable fake timers
         this.clock.restore();
         this.component.destroy();
+        this.utilities.dom.remove(this.el);
     }
 });
 
@@ -38,12 +42,14 @@ test('module should fire "resize" event with the proper data when initialized', 
         data = {
             width: w,
             height: h
-        },
-        $el = $('<div>').css(data).appendTo(document.body);
+        };
+
+    this.utilities.dom.css(this.el, data);
+
     this.mock(this.scope)
         .expects('broadcast')
         .withArgs('resize', sinon.match(data));
-    this.component.init($el);
+    this.component.init(this.el);
 });
 
 test('module should fire "resize" event with the proper data when element is resized', function () {
@@ -52,22 +58,21 @@ test('module should fire "resize" event with the proper data when element is res
             width: w,
             height: h
         },
-        module = this.component,
-        $el = $('<div>').css({
-            width: 0,
-            height: 0
-        }).appendTo(document.body);
+        module = this.component;
 
-    module.init($el);
+    this.utilities.dom.css(this.el, {
+        width: 0,
+        height: 0
+    });
+    module.init(this.el);
     this.clock.tick(1);
 
     this.mock(this.scope)
         .expects('broadcast')
         .withArgs('resize', sinon.match(data));
 
-    $el.css(data);
+    this.utilities.dom.css(this.el, data);
     this.clock.tick(1);
-    $el.remove();
 });
 
 test('onmessage() should trigger a resize message when called', function () {
@@ -75,9 +80,9 @@ test('onmessage() should trigger a resize message when called', function () {
         data = {
             width: w,
             height: h
-        },
-        $el = $('<div>').css(data).appendTo(document.body);
-    this.component.init($el);
+        };
+    this.utilities.dom.css(this.el, data);
+    this.component.init(this.el);
     this.mock(this.scope)
         .expects('broadcast')
         .withArgs('resize', sinon.match(data));

@@ -37,13 +37,13 @@ Crocodoc.addUtility('dom', function () {
             $(parent).append(child);
         },
 
-        data: function (el, k, v) {
+        data: function (el) {
             var $el = $(el);
             var args = [].slice.call(arguments, 1);
             return $el.data.apply($el, args);
         },
 
-        attr: function (el, k, v) {
+        attr: function (el) {
             var $el = $(el);
             var args = [].slice.call(arguments, 1);
             return $el.attr.apply($el, args);
@@ -53,7 +53,7 @@ Crocodoc.addUtility('dom', function () {
             return $(el).removeAttr(a);
         },
 
-        css: function (el, k, v) {
+        css: function (el) {
             var $el = $(el);
             var args = [].slice.call(arguments, 1);
             return $el.css.apply($el, args);
@@ -64,7 +64,7 @@ Crocodoc.addUtility('dom', function () {
         },
 
         remove: function (el) {
-            if (el.parentNode) {
+            if (el && el.parentNode) {
                 el.parentNode.removeChild(el);
             }
             return el;
@@ -108,13 +108,13 @@ Crocodoc.addUtility('dom', function () {
             $(el).html(html);
         },
 
-        on: function (el, type, fn) {
+        on: function (el) {
             var args = [].slice.call(arguments, 1);
             var $el = $(el);
             $el.on.apply($el, args);
         },
 
-        off: function (el, type, fn) {
+        off: function (el) {
             var args = [].slice.call(arguments, 1);
             var $el = $(el);
             $el.off.apply($el, args);
