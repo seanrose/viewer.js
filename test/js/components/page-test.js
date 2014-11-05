@@ -26,13 +26,15 @@ module('Component - page', {
             support: {
                 svg: true
             },
-            dom: Crocodoc.getUtilityForTest('dom')
+            dom: Crocodoc.getUtilityForTest('dom'),
+            promise: Crocodoc.getUtilityForTest('promise')
         };
         this.scope = Crocodoc.getScopeForTest(this);
         this.component = Crocodoc.getComponentForTest('page', this.scope);
         var container = this.utilities.dom.create('div');
         this.utilities.dom.html(container, PAGE_HTML_TEMPLATE);
         this.el = this.utilities.dom.find('.crocodoc-page', container);
+        this.promise = this.utilities.promise;
     }
 });
 
@@ -54,11 +56,17 @@ test('init() should create and init PageText, PageSVG, and PageLinks components 
         .withArgs('page-links');
 
     mockPageText.expects('init')
-        .withArgs(sinon.match.instanceOf(Element), config.index + 1);
+        // @TODO: fix this when (https://github.com/cjohansen/Sinon.JS/issues/594) is resolved
+        // .withArgs(sinon.match.instanceOf(Element), config.index + 1);
+        .withArgs(sinon.match.any, config.index + 1);
     mockPageSVG.expects('init')
-        .withArgs(sinon.match.instanceOf(Element), config.index + 1);
+        // @TODO: fix this when (https://github.com/cjohansen/Sinon.JS/issues/594) is resolved
+        // .withArgs(sinon.match.instanceOf(Element), config.index + 1);
+        .withArgs(sinon.match.any, config.index + 1);
     mockPageLinks.expects('init')
-        .withArgs(sinon.match.instanceOf(Element), config.links);
+        // @TODO: fix this when (https://github.com/cjohansen/Sinon.JS/issues/594) is resolved
+        // .withArgs(sinon.match.instanceOf(Element), config.links);
+        .withArgs(sinon.match.any, config.links);
 
     this.component.init(this.el, config);
 });
@@ -165,14 +173,13 @@ test('load() should broadcast pagefail when the page fails to load', function ()
         status: PAGE_STATUS_NOT_LOADED
     });
 
-    var $promise = $.Deferred().reject(error).promise();
     this.mock(this.scope)
         .expects('broadcast')
         .withArgs('pagefail', { page: index + 1, error: sinon.match(error) });
 
     this.mock(this.components['page-svg'])
         .expects('load')
-        .returns($promise);
+        .returns(this.promise.deferred().reject(error).promise());
 
     this.component.load();
 });

@@ -17,7 +17,8 @@
         // Private
         //----------------------------------------------------------------------
 
-        var util = Crocodoc.getUtility('common');
+        var util = Crocodoc.getUtility('common'),
+            promise = Crocodoc.getUtility('promise');
 
         var instances = [],
             messageQueue = [],
@@ -169,7 +170,7 @@
          * provider that is specified in that map instead.
          * @param {string} objectType The type of object to retrieve ('page-svg', 'page-text', etc)
          * @param {string} objectKey  The key of the object to retrieve
-         * @returns {$.Promise}
+         * @returns {promise}
          */
         this.get = function(objectType, objectKey) {
             var newObjectType = config.dataProviders[objectType] || objectType;
@@ -178,7 +179,7 @@
             if (provider) {
                 return provider.get(objectType, objectKey);
             }
-            return $.Deferred().reject('data-provider not found').promise();
+            return promise.deferred().reject('data-provider not found').promise();
         };
 
         /**

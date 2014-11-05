@@ -12,7 +12,6 @@ module('Plugin - realtime', {
         // the viewer config
         this.config = {
             api: this.viewerAPI,
-            $el: $('<div>'),
             conversionIsComplete: true,
             numPages: 5
         };

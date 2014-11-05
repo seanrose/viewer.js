@@ -28,7 +28,7 @@ module('Component - resizer', {
 });
 
 test('destroy() should call support.cancelAnimationFrame when called', function () {
-    this.component.init($('<div>'));
+    this.component.init(this.utilities.dom.create('div'));
 
     this.mock(this.utilities.support)
         .expects('cancelAnimationFrame')
