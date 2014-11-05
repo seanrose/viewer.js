@@ -105,7 +105,7 @@ Crocodoc.addUtility('dom', function () {
         },
 
         html: function (el, html) {
-            $(el).html(html);
+            return $(el).html(html).get(0);
         },
 
         on: function (el) {
